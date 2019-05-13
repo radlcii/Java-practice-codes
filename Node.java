@@ -50,35 +50,52 @@ public class Node<E>{
     /**************/
     /*   Setters  */
     /**************/
-    void setData(E data) {
+    public void setData(E data) {
         this.data = data;
     }
 
-    void setLink0(Node<E> n) {
+    public void setLink0(Node<E> n) {
         link0 = n;
     }
 
-    void setLink1(Node<E> n) {
+    public void setLink1(Node<E> n) {
         link1 = n;
     }
 
-    void setLink2(Node<E> n) {
+    public void setLink2(Node<E> n) {
         link2 = n;
     }
 
     /* Special setters for trees */
 
-    void setleftChild(Node<E> n) {
+    public void setLeftChild(Node<E> n) {
         link0 = n;
     }
 
-    void setRightChild(Node<E> n) {
+    public void setRightChild(Node<E> n) {
         link2 = n;
     }
 
     @Override
     public String toString() {
-        String result = "Data = " + data + ";\nLink0 AKA LeftChild = " + link0 + ";\nLink1 = " + link1 + ";\nLink2 AKA RightChild = " + link2;
-        return result;
+        /* To prevent recursive printing and null pointer exceptions, the links returns had to be checked individually and amalgamated for the returned string */
+        String result = "";
+        String link_0_Filler;
+        String link_1_Filler;
+        String link_2_Filler;
+        
+        if (link0 == null) { link_0_Filler = "null"; }
+        else { link_0_Filler = this.getLink0().getData().toString(); }
+        
+        if (link1 == null) { link_1_Filler = "null"; }
+        else { link_1_Filler = this.getLink1().getData().toString(); }
+        
+        if (link2 == null) { link_2_Filler = "null"; }
+        else { link_2_Filler = this.getLink2().getData().toString(); }
+
+        return "Data = " + this.getData().toString() + ";\n" + 
+                  "Link0 AKA LeftChild = " + link_0_Filler + ";\n" + 
+                  "Link1 = " + link_1_Filler + ";\n" +
+                  "Link2 AKA RightChild = " + link_2_Filler;
     }
 }
