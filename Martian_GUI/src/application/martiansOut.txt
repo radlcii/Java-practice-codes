@@ -1,8 +1,0 @@
-R 3 40 T F 
-R 4 25 T T 
-G 5 100 T F 
-G 6 67 F T 
-R 900 0 T F 
-G 7 15 T F 
-R 8 71 F T 
-G 9 99 T F 
