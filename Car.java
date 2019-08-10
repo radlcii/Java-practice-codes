@@ -15,8 +15,8 @@ import java.util.concurrent.Semaphore;
 public class Car extends Thread {
     protected char direction;           // Set at random, determines which side of the tunnel the car starts on.
     protected int carNum;               // Set by operator program, for user examination.  Not needed for function.
-    protected Semaphore carSema;
-    String[][] outputGeneration;
+    protected Semaphore carSema;        // This is the permit issuer for running cars
+    String[][] outputGeneration;        // This is used to format the console output.  It is NOT synchronized
 
     // Constructor, it only requires the carNum integer
     public Car(int carNum, char direction, Semaphore carSema, String[][] outputGeneration) {
@@ -27,6 +27,7 @@ public class Car extends Thread {
         //System.out.printf( "%2d%c is waiting.%n", carNum, direction);
     }
 
+    // Returns the car's ID number
     public int getCarNum() {
         return carNum;
     }
@@ -40,15 +41,13 @@ public class Car extends Thread {
         try {
             boolean isDone = false;
             carSema.acquire();          // Aquire a carSema permit
-            outputGeneration [carNum][0] = ( carNum + "" + direction + " is moving through the tunnel." );
-            //System.out.printf( "%2d%c is moving through the tunnel.%n", carNum, direction );
+            outputGeneration [carNum][0] = String.format( "%2d%c is moving through the tunnel.", carNum, direction );
+            //System.out.printf( "%2d%c is moving through the tunnel.%n", carNum, direction );      // Alternate output method that prints as the program reaches this point
             Thread.sleep(1000);         // Time it takes to drive through the tunnel
-            outputGeneration [carNum][1] = ( carNum + "" + direction + " has exited the tunnel." );
-            //System.out.printf( "%2d%c has exited the tunnel.%n", carNum, direction );
-            
-        } catch (InterruptedException e) { 
-            e.printStackTrace(); 
-        }
+            outputGeneration [carNum][1] = String.format( "%2d%c has exited the tunnel.", carNum, direction );
+            //System.out.printf( "%2d%c has exited the tunnel.%n", carNum, direction );             // Alternate output method that prints as the program reaches this point
+        } catch (InterruptedException e) { e.printStackTrace(); }
+        
         carSema.release();          // Release the carSema permit
     }
 }
