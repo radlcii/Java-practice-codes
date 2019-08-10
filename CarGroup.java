@@ -25,7 +25,7 @@ public class CarGroup extends Thread {
     ArrayList<Car> groupList;       // Belongs to the calling class, ArrayList of Cars that makes use of objects passed as references
     AtomicInteger carNum;           // Belongs to the calling class, a thread-safe counter
     char direction;                 // Provided by the calling class, a character denoting direction of travel
-    String[][] outputGeneration;
+    String[][] outputGeneration;    // This is used to format the console output.  It is NOT synchronized
     
     public CarGroup (Semaphore groupSema, Semaphore carSema, ArrayList<Car> groupList, AtomicInteger carNum, char direction, String[][] outputGeneration ) {
         this.groupSema = groupSema;

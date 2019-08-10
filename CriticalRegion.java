@@ -30,7 +30,7 @@ public class CriticalRegion {
     private static ArrayList<Car> left = new ArrayList<Car>();      // ArrayList to hold cars, passed by reference to the left group
     private static ArrayList<Car> right = new ArrayList<Car>();     // ArrayList to hold cars, passed by reference to the right group
 
-    static String[][] outputGeneration = new String[MAX_NUM_CARS][2];   // This is an attempt to make a cleaner output
+    static String[][] outputGeneration = new String[MAX_NUM_CARS][2];   // This is used to format the console output.  It is NOT synchronized
     
     public static void main(String[] args) {
 
