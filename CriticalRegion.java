@@ -10,7 +10,7 @@
         A single direction should not limited to sending just one car through the tunnel.
         The order of cars passing through the tunnel from one direction does not need to be maintained
 
-    The language of using cars and tunnels is not to be taken literally, the key point here is 
+    The language of using cars and tunnels is not to be taken too literally, the key point here is 
         that the critical region (tunnel) will not accept/process threads from more than one direction at the time
         and that the critical region will not take threads from the other side before all the ones in it have finished.
 */
@@ -21,41 +21,49 @@ import java.util.ArrayList;
 
 public class CriticalRegion {
     static Semaphore groupSema = new Semaphore(1);                  // Allows only 1 side to activate cars at the time
-    static Semaphore carSema = new Semaphore(3);                    // Allows 3 cars to be active in the tunnel at the time
     private static final int MAX_NUM_CARS = 10;                     // Max number of cars tho simulate
     private static AtomicInteger carNum = new AtomicInteger(0);     // Threadsafe number for thread identification
     private static ArrayList<Car> left = new ArrayList<Car>();
     private static ArrayList<Car> right = new ArrayList<Car>();
-    private static ArrayList<Car> tunnel = new ArrayList<Car>();
     
     public static void main(String[] args) {
-        Semaphore whosTurnIsItAnyway = new Semaphore(1);
-        while (carNum.get() < MAX_NUM_CARS) {
+
+        CarGroup leftGroup = new CarGroup(groupSema, left, 'L', carNum);    // Each group is a sub-process of this class
+        CarGroup rightGroup = new CarGroup(groupSema, right, 'R', carNum);  
+        
+        while (carNum.get() < MAX_NUM_CARS) {                               // RNG determines the distribution of cars
             if (Math.random() < .5 ) {
-                left.add( new Car(carNum.getAndIncrement(), 'L', carSema) );
+                leftGroup.createCar( carNum.getAndIncrement() );
             }
             else {
-                right.add( new Car(carNum.getAndIncrement(), 'R', carSema) );
+                rightGroup.createCar( carNum.getAndIncrement() );
             }
         }
-        System.out.println("");
-        //System.out.println(left.size() ); System.out.println(right.size() );
+        System.out.println("");         // Output formatting
 
         for (Car car: left) {
-            System.out.printf("|%2d%c", car.getCarNum(), car.getDirection() );
+            System.out.printf("|%2d%c ", car.getCarNum(), car.getDirection() );     // Prints the arraylist of left-bound cars for verification
         }
-        System.out.println("|");
+        System.out.println("|");        // Output formatting
         for (Car car: right) {
-            System.out.printf("|%2d%c", car.getCarNum(), car.getDirection() );
+            System.out.printf("|%2d%c ", car.getCarNum(), car.getDirection() );     // Prints the arraylist of right-bound cars for verification
         }
-        System.out.println("|");
-        System.out.println("");
+        System.out.println("|");        // Output formatting
+        System.out.println("");         // Output formatting
         
-        CarGroup leftGroup = new CarGroup(groupSema, left, 'L');
-        CarGroup rightGroup = new CarGroup(groupSema, right, 'R');
-        leftGroup.start();
-        try { leftGroup.join(); } catch (InterruptedException e) { e.printStackTrace(); }
-        rightGroup.start();
-        try { rightGroup.join(); } catch (InterruptedException e) { e.printStackTrace(); }
+        /*
+        leftGroup.start();          // Starts the left-bound traffic
+        rightGroup.start();         // Starts the right-bound traffic
+        */
+        try {
+            leftGroup.start();          // Starts the left-bound traffic
+            leftGroup.join();           // Calling Thread.join here forces the leftGroup threads to finish before rightGroup can go
+        
+            rightGroup.start();         // Starts the right-bound traffic
+            rightGroup.join();          // Calling Thread.join here forces the rightGroup threads to finish before leftGroup can go
+        } catch (InterruptedException e) { 
+            e.printStackTrace(); 
+        }
+        
     }
 }

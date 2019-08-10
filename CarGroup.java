@@ -16,19 +16,27 @@
 */
 
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.ArrayList;
 
 public class CarGroup extends Thread {
     Semaphore groupSema;
+    static Semaphore carSema = new Semaphore(3);                    // Allows 3 cars to be active in the tunnel at the time
     ArrayList<Car> groupList;
-    char group;
+    char direction;
+    AtomicInteger carNum;
     
-    public CarGroup (Semaphore groupSema, ArrayList<Car> groupList, char group) {
+    public CarGroup (Semaphore groupSema, ArrayList<Car> groupList, char direction, AtomicInteger carNum) {
         this.groupSema = groupSema;
         this.groupList = groupList;
-        this.group = group;
+        this.direction = direction;
+        this.carNum = carNum;
     }
 
+    public void createCar (int carNum) {
+        groupList.add( new Car(carNum, direction, carSema) );
+    }
+    
     public void run() {
         try { 
             groupSema.acquire(); 
