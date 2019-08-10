@@ -20,33 +20,37 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.ArrayList;
 
 public class CarGroup extends Thread {
-    Semaphore groupSema;
-    static Semaphore carSema = new Semaphore(3);                    // Allows 3 cars to be active in the tunnel at the time
-    ArrayList<Car> groupList;
-    char direction;
-    AtomicInteger carNum;
+    Semaphore groupSema;            // Belongs to the calling class, actually a Mutex (single-key semaphore)
+    Semaphore carSema;              // Belongs to the calling class, this is the semaphore for individual cars
+    ArrayList<Car> groupList;       // Belongs to the calling class, ArrayList of Cars that makes use of objects passed as references
+    AtomicInteger carNum;           // Belongs to the calling class, a thread-safe counter
+    char direction;                 // Provided by the calling class, a character denoting direction of travel
+    String[][] outputGeneration;
     
-    public CarGroup (Semaphore groupSema, ArrayList<Car> groupList, char direction, AtomicInteger carNum) {
+    public CarGroup (Semaphore groupSema, Semaphore carSema, ArrayList<Car> groupList, AtomicInteger carNum, char direction, String[][] outputGeneration ) {
         this.groupSema = groupSema;
+        this.carSema = carSema;
         this.groupList = groupList;
-        this.direction = direction;
         this.carNum = carNum;
+        this.direction = direction;
+        this.outputGeneration = outputGeneration;
     }
 
-    public void createCar (int carNum) {
-        groupList.add( new Car(carNum, direction, carSema) );
+    public void createCar (int carNum) {    // Called by the class that created this thread
+        groupList.add( new Car(carNum, direction, carSema, outputGeneration) );
     }
     
     public void run() {
         try { 
-            groupSema.acquire(); 
-            for(Car c: groupList) {
-                c.start();
+            groupSema.acquire();            // Aquire the groupSema lock
+            while ( !groupList.isEmpty() ) {
+                Thread.sleep(250);
+                groupList.remove(0).start();
             }
         } catch (InterruptedException e) { 
             e.printStackTrace(); 
-        } finally {
-            groupSema.release();
         }
-    }
-}
+        groupSema.release();            // Release the groupSema lock
+    } // End of run method
+
+} // End of class

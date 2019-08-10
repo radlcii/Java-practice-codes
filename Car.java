@@ -15,14 +15,16 @@ import java.util.concurrent.Semaphore;
 public class Car extends Thread {
     protected char direction;           // Set at random, determines which side of the tunnel the car starts on.
     protected int carNum;               // Set by operator program, for user examination.  Not needed for function.
-    protected Semaphore sideSema;
+    protected Semaphore carSema;
+    String[][] outputGeneration;
 
     // Constructor, it only requires the carNum integer
-    public Car(int carNum, char direction, Semaphore sideSema) {
+    public Car(int carNum, char direction, Semaphore carSema, String[][] outputGeneration) {
         this.carNum = carNum;
         this.direction = direction;
-        this.sideSema = sideSema;
-        System.out.printf( "%2d%c has arrived and is waiting to move through the tunnel.%n", carNum, direction);
+        this.carSema = carSema;
+        this.outputGeneration = outputGeneration;
+        //System.out.printf( "%2d%c is waiting.%n", carNum, direction);
     }
 
     public int getCarNum() {
@@ -35,15 +37,18 @@ public class Car extends Thread {
     }
 
     public void run() {
-        try { sideSema.acquire(); 
-            System.out.printf( "%2d%c is moving through the tunnel.%n", carNum, direction);
-            try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }         // Time it takes to drive through the tunnel
-            System.out.printf( "%2d%c has exited the tunnel.%n", carNum, direction);
-            Thread.sleep(1000);
+        try {
+            boolean isDone = false;
+            carSema.acquire();          // Aquire a carSema permit
+            outputGeneration [carNum][0] = ( carNum + "" + direction + " is moving through the tunnel." );
+            //System.out.printf( "%2d%c is moving through the tunnel.%n", carNum, direction );
+            Thread.sleep(1000);         // Time it takes to drive through the tunnel
+            outputGeneration [carNum][1] = ( carNum + "" + direction + " has exited the tunnel." );
+            //System.out.printf( "%2d%c has exited the tunnel.%n", carNum, direction );
+            
         } catch (InterruptedException e) { 
             e.printStackTrace(); 
-        } finally {
-            sideSema.release();
         }
+        carSema.release();          // Release the carSema permit
     }
 }
